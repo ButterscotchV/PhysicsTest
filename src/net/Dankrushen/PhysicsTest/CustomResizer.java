@@ -90,8 +90,28 @@ public class CustomResizer extends MouseAdapter
     
     private boolean doPop(MouseEvent e) {
 		if (e.isPopupTrigger() && instance.containsKey(e.getSource())) {
-			PopUp menu = new PopUp(instance.get(e.getSource()).parentInstance);
+			PhysicsTest parent = instance.get(e.getSource()).parentInstance;
+			
+			parent.popup = true;
+			parent.windowPhys.pausePhysics(true);
+			
+			PopUp menu = new PopUp(parent);
 			menu.show(e.getComponent(), e.getX(), e.getY());
+			
+			new Thread() {
+				public void run() {
+					while(menu.isShowing()) {
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					
+					parent.windowPhys.pausePhysics(false);
+					parent.popup = false;
+				}
+			}.start();
 			
 			return true;
 		}

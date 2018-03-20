@@ -9,8 +9,7 @@ public class Vector2 {
 	boolean pointGrav = false;
 	float posGravx = 0f;
 	float posGravy = 0f;
-	float gravScalex = 1f;
-	float gravScaley = 1f;
+	float gravScale = 1f;
 	float gravMass = 0f;
 
 	float posx = 0f;
@@ -331,6 +330,6 @@ public class Vector2 {
 		
 		// System.out.println("xGrav: " + xGrav + " yGrav: " + yGrav + " total: " + Math.sqrt(Math.pow(xGrav, 2) + Math.pow(yGrav, 2)));
 		
-		return new float[] {xGrav, ((yGrav / this.gravScaley) * this.gravScalex)};
+		return new float[] {xGrav, yGrav};
 	}
 }

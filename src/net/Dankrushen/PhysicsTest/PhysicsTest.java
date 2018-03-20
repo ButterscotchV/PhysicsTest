@@ -34,12 +34,13 @@ class PopUp extends JPopupMenu {
 
 		{
 			put("Rubber", 1f);
-			put("Glass", 0.94f);
 			put("Steel", 0.74f);
-			put("Aluminum", 0.61f);
-			put("Copper", 0.53f);
-			put("Wood", 0.40f);
-			put("Ice", 0.1f);
+			put("Glass", 0.6f);
+			put("Aluminum", 0.47f);
+			put("Wood", 0.45f);
+			put("Copper", 0.36f);
+			put("Graphite", 0.1f);
+			put("Teflon", 0.04f);
 		}
 	};
 
@@ -55,41 +56,26 @@ class PopUp extends JPopupMenu {
 	}
 
 	public PopUp(PhysicsTest parent){
-
-		int curFric = parent.curFric;
-		int nextFricIndex = (curFric < FRICTIONS.size() - 1 ? curFric + 1 : 0);
-		int prevFricIndex = (curFric > 0 ? curFric - 1 : FRICTIONS.size() - 1);
-
+		JMenuItem fric = new JMenuItem("Friction:");
+		add(fric);
+		
 		List<Entry<String, Float>> keys = new ArrayList<Entry<String, Float>>(FRICTIONS.entrySet());
 
-		Entry<String, Float> curEntry = keys.get(curFric);
-		Entry<String, Float> nextEntry = keys.get(nextFricIndex);
-		Entry<String, Float> prevEntry = keys.get(prevFricIndex);
-
-		JMenuItem curFricName = new JMenuItem("Current: " + curEntry.getKey() + " (" + curEntry.getValue() + ")");
-		add(curFricName);
-
-		addSeparator();
-
-		JMenuItem nextFric = new JMenuItem("Next - " + nextEntry.getKey() + " (" + nextEntry.getValue() + ")");
-		nextFric.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				parent.curFric = nextFricIndex;
-				parent.friction = nextEntry.getValue();
-			}
-		});
-		add(nextFric);
-
-		JMenuItem prevFric = new JMenuItem("Previous - " + prevEntry.getKey() + " (" + prevEntry.getValue() + ")");
-		prevFric.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				parent.curFric = prevFricIndex;
-				parent.friction = prevEntry.getValue();
-			}
-		});
-		add(prevFric);
+		for(int i = 0; i < FRICTIONS.size(); i++) {
+			final int index = i;
+			final Entry<String, Float> curEntry = keys.get(index);
+			
+			JCheckBoxMenuItem fricItem = new JCheckBoxMenuItem(curEntry.getKey() + " (" + curEntry.getValue() + ")");
+			fricItem.setSelected(index == parent.curFric);
+			fricItem.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseReleased(MouseEvent e) {
+					parent.curFric = index;
+					parent.friction = curEntry.getValue();
+				}
+			});
+			add(fricItem);
+		}
 
 		addSeparator();
 
@@ -112,14 +98,14 @@ class PopUp extends JPopupMenu {
 			}
 		});
 		add(lock);
-		
+
 		JCheckBoxMenuItem gravPoint = new JCheckBoxMenuItem("Gravity Point");
 		gravPoint.setSelected(parent.GRAV_POINT);
 		gravPoint.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				parent.GRAV_POINT = !parent.GRAV_POINT;
-				
+
 				if(!parent.GRAV_POINT) {
 					parent.parent.unsetGravPoint();
 				}
@@ -128,7 +114,7 @@ class PopUp extends JPopupMenu {
 		add(gravPoint);
 
 		addSeparator();
-		
+
 		JMenuItem open = new JMenuItem("New Window");
 		open.addMouseListener(new MouseAdapter() {
 			@Override
@@ -167,18 +153,18 @@ public class PhysicsTest {
 	int targetFramerate = 60;
 	int frameLimit = Math.round(1f / ((float) targetFramerate) * 1000f);
 
-	public float xScale = 1920f / 0.508f; // 1920 pixels / 20 inches wide or 0.508 meters
-	public float yScale = 1080f / 0.28702f; // 1080 pixels / 11.3 inches high or 0.28702 meters
+	public float scale = 1080f / 0.28702f; // 1080 pixels / 11.3 inches high or 0.28702 meters
 	int x = 0;
 	int y = 0;
 
-	int curFric = 3;
+	int curFric = 2;
 	float friction = PopUp.getIndexValue(curFric);
 
 	boolean THROW = false;
 	boolean LOCK_PHYS = false;
 	boolean GRAV_POINT = false;
-	private boolean dragging = false;
+	boolean dragging = false;
+	boolean popup = false;
 	double throwEvery = 3d * (double) targetFramerate; // Frames (in seconds)
 	int framecount = 0;
 
@@ -209,7 +195,7 @@ public class PhysicsTest {
 
 				if(THROW && (double) framecount >= throwEvery) {
 					Random random = new Random();
-					windowPhys.addVelocity(((random.nextFloat() - 0.50f) * 0.80f) * xScale, (random.nextFloat() * 0.65f) * yScale);
+					windowPhys.addVelocity(((random.nextFloat() - 0.50f) * 0.80f) * scale, (random.nextFloat() * 0.65f) * scale);
 
 					double mintime = 0.5d;
 					double maxtime = 3d;
@@ -219,17 +205,16 @@ public class PhysicsTest {
 
 				//windowPhys.gravx = xScale * 0.62f; // Scale m/s2
 				//windowPhys.gravy = yScale * 0.62f; // Scale m/s2
-				windowPhys.grav = yScale * 0.05f;
-				windowPhys.gravScalex = xScale;
-				windowPhys.gravScaley = yScale;
-				
+				windowPhys.grav = scale * 0.62f;
+				windowPhys.gravScale = scale;
+
 				windowPhys.mass = 100f;
 
-				windowPhys.fricFloor = xScale * friction;
-				windowPhys.fricCeil = xScale * friction;
+				windowPhys.fricFloor = scale * friction;
+				windowPhys.fricCeil = scale * friction;
 
-				windowPhys.fricLWall = yScale * friction;
-				windowPhys.fricRWall = yScale * friction;
+				windowPhys.fricLWall = scale * friction;
+				windowPhys.fricRWall = scale * friction;
 
 				windowPhys.addVelocity(0f, windowPhys.gravy * 0f);
 
@@ -259,16 +244,18 @@ public class PhysicsTest {
 			windowPhys.setLWall(0f - 1280f);
 			windowPhys.setRWall(width - frame.getWidth() + 1280f);
 
-			Point location = frame.getLocationOnScreen();
-			windowPhys.setCeil(0f);
-			windowPhys.setFloor(height - frame.getHeight() - (location.getX() < 0d || location.getX() > (1920d - frame.getWidth()) ? 56f : 0f) - 40f);
+			if(frame.isVisible()) {
+				Point location = frame.getLocationOnScreen();
+				windowPhys.setCeil(0f);
+				windowPhys.setFloor(height - frame.getHeight() - (location.getX() < 0d || location.getX() > (1920d - frame.getWidth()) ? 56f : 0f) - 40f);
+			}
 		}
 	}
 
 	public void calculateMove() {
 		if (LOCK_PHYS) {
 			windowPhys.pausePhysics(true);
-		} else if(windowPhys.pausePhysics != LOCK_PHYS && !dragging) {
+		} else if(windowPhys.pausePhysics != LOCK_PHYS && !dragging && !popup) {
 			windowPhys.pausePhysics(false);
 		}
 
@@ -298,11 +285,11 @@ public class PhysicsTest {
 		if(!windowPhys.pausePhysics)
 			moveWindow();
 		else windowPhys.setVelocity((oldPos[0] - this.x) * frameLimit, (oldPos[1] - this.y) * frameLimit);
-		
+
 		if(GRAV_POINT)
 			parent.setGravPoint(this, this.x, this.y, this.windowPhys.mass);
 
-		drawColour(Math.abs(windowPhys.velx / xScale) + Math.abs(windowPhys.vely / yScale));
+		drawColour(Math.abs(windowPhys.velx / scale) + Math.abs(windowPhys.vely / scale));
 	}
 
 	public void moveWindow() {
@@ -356,7 +343,7 @@ public class PhysicsTest {
 			GRAV_POINT = false;
 			parent.unsetGravPoint();
 		}
-		
+
 		this.frame.setVisible(false);
 		this.frame.dispose();
 	}
