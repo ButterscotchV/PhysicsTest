@@ -168,7 +168,7 @@ public class PhysicsTest {
 	double throwEvery = 3d * (double) targetFramerate; // Frames (in seconds)
 	int framecount = 0;
 
-	boolean regBuild = false;
+	boolean regBuild = true;
 
 	WindowManager parent;
 
@@ -183,7 +183,6 @@ public class PhysicsTest {
 
 		Point location = frame.getLocationOnScreen();
 		windowPhys = new Vector2((float) location.getX(), (float) location.getY());
-		windowPhys.invertX = false;
 		windowPhys.invertY = true;
 
 		moveWindow();
@@ -216,7 +215,7 @@ public class PhysicsTest {
 				windowPhys.fricLWall = scale * friction;
 				windowPhys.fricRWall = scale * friction;
 
-				windowPhys.addVelocity(0f, windowPhys.gravy * 0f);
+				// windowPhys.addVelocity(0f, windowPhys.gravy * 0f);
 
 				calculateMove();
 				framecount++;

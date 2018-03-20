@@ -299,7 +299,7 @@ public class Vector2 {
 			direction = Direction.NORTH;
 		else if(diffx >= 0f && diffy < 0f)
 			direction = Direction.SOUTH;
-		else if(diffx < 0f && diffy < 0f)
+		else if(diffx <= 0f && diffy < 0f)
 			direction = Direction.EAST;
 		
 		double angle = Math.atan(Math.abs(diffy) / Math.abs(diffx));
