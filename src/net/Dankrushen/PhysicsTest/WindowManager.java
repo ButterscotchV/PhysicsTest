@@ -33,20 +33,17 @@ public class WindowManager {
 
 	public void setGravPoint(PhysicsTest window, int x, int y, float mass) {
 		for (PhysicsTest target : windows) {
-			if(target != window) {
-				target.GRAV_POINT = false;
-			}
-			
-			target.windowPhys.posGravx = (float) x;
-			target.windowPhys.posGravy = (float) y;
+			target.windowPhys.addGravityPoint(window.windowPhys);
 			target.windowPhys.gravMass = mass;
 			target.windowPhys.pointGrav = true;
 		}
 	}
 	
-	public void unsetGravPoint() {
+	public void unsetGravPoint(PhysicsTest window) {
 		for (PhysicsTest target : windows) {
-			target.windowPhys.pointGrav = false;
+			target.windowPhys.removeGravityPoint(window.windowPhys);
+			if(target.windowPhys.posGrav.isEmpty())
+				target.windowPhys.pointGrav = false;
 		}
 	}
 	
@@ -56,8 +53,6 @@ public class WindowManager {
 	
 	public void closeWindow(PhysicsTest window) {
 		window.close();
-
-		unsetGravPoint();
 		
 		if(windows.contains(window))
 			windows.remove(window);

@@ -107,7 +107,7 @@ class PopUp extends JPopupMenu {
 				parent.GRAV_POINT = !parent.GRAV_POINT;
 
 				if(!parent.GRAV_POINT) {
-					parent.parent.unsetGravPoint();
+					parent.parent.unsetGravPoint(parent);
 				}
 			}
 		});
@@ -157,6 +157,9 @@ public class PhysicsTest {
 	int x = 0;
 	int y = 0;
 
+	int xPointDiff = 0;
+	int yPointDiff = 0;
+	
 	int curFric = 2;
 	float friction = PopUp.getIndexValue(curFric);
 
@@ -232,21 +235,24 @@ public class PhysicsTest {
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		int width = gd.getDisplayMode().getWidth();
 		int height = gd.getDisplayMode().getHeight();
+		
+		xPointDiff = (int) Math.round((double) frame.getWidth() / 2d);
+		yPointDiff = (int) Math.round((double) frame.getHeight() / 2d);
 
 		if(regBuild) {
-			windowPhys.setLWall(0f);
-			windowPhys.setRWall(width - frame.getWidth());
+			windowPhys.setLWall(0f + xPointDiff);
+			windowPhys.setRWall(width - frame.getWidth() + xPointDiff);
 
-			windowPhys.setCeil(0);
-			windowPhys.setFloor(height - frame.getHeight() - 40f);
+			windowPhys.setCeil(0f + yPointDiff);
+			windowPhys.setFloor(height - frame.getHeight() - 40f + yPointDiff);
 		} else {
-			windowPhys.setLWall(0f - 1280f);
-			windowPhys.setRWall(width - frame.getWidth() + 1280f);
+			windowPhys.setLWall(0f - 1280f + xPointDiff);
+			windowPhys.setRWall(width - frame.getWidth() + 1280f + xPointDiff);
 
 			if(frame.isVisible()) {
 				Point location = frame.getLocationOnScreen();
-				windowPhys.setCeil(0f);
-				windowPhys.setFloor(height - frame.getHeight() - (location.getX() < 0d || location.getX() > (1920d - frame.getWidth()) ? 56f : 0f) - 40f);
+				windowPhys.setCeil(0f + yPointDiff);
+				windowPhys.setFloor(height - frame.getHeight() - (location.getX() < 0d || location.getX() > (1920d - frame.getWidth()) ? 56f : 0f) - 40f + yPointDiff);
 			}
 		}
 	}
@@ -271,8 +277,8 @@ public class PhysicsTest {
 
 		if(frame.isVisible()) {
 			Point location = frame.getLocationOnScreen();
-			this.x = location.x + disX;
-			this.y = location.y + disY;
+			this.x = location.x + disX + this.xPointDiff;
+			this.y = location.y + disY + this.yPointDiff;
 		}
 
 		float[] oob = windowPhys.outOfBounds(this.x, this.y);
@@ -292,7 +298,7 @@ public class PhysicsTest {
 	}
 
 	public void moveWindow() {
-		frame.setLocation(this.x, this.y);
+		frame.setLocation(this.x - this.xPointDiff, this.y - this.yPointDiff);
 	}
 
 	public void drawColour(float netVel) {
@@ -340,7 +346,7 @@ public class PhysicsTest {
 	public void close() {
 		if(GRAV_POINT) {
 			GRAV_POINT = false;
-			parent.unsetGravPoint();
+			parent.unsetGravPoint(this);
 		}
 
 		this.frame.setVisible(false);
