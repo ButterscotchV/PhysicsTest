@@ -31,10 +31,9 @@ public class WindowManager {
 		windows.add(new PhysicsTest(this));
 	}
 
-	public void setGravPoint(PhysicsTest window, int x, int y, float mass) {
+	public void setGravPoint(PhysicsTest window, int x, int y, double mass) {
 		for (PhysicsTest target : windows) {
 			target.windowPhys.addGravityPoint(window.windowPhys);
-			target.windowPhys.gravMass = mass;
 			target.windowPhys.pointGrav = true;
 		}
 	}

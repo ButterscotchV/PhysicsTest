@@ -4,54 +4,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Vector2 {
-	float grav = 9.81f;
+	double grav = 9.81d;
 
-	float gravx = 0f;
-	float gravy = grav;
+	double gravx = 0d;
+	double gravy = grav;
 
 	boolean pointGrav = false;
 	List<Vector2> posGrav = new ArrayList<Vector2>();
-	float gravScale = 1f;
-	float gravMass = 0f;
+	double gravScale = 1d;
 
-	float posx = 0f;
-	float posy = 0f;
+	double posx = 0d;
+	double posy = 0d;
 
-	float velx = 0f;
-	float vely = 0f;
+	double velx = 0d;
+	double vely = 0d;
 
-	float accelx = 0f;
-	float accely = 0f;
+	double accelx = 0d;
+	double accely = 0d;
 
-	float mass = 0f;
+	double mass = 0d;
 
 	boolean invertX = false;
 	boolean invertY = false;
 
 	boolean useFloor = false;
-	float floor = 0f;
+	double floor = 0d;
 	boolean useCeil = false;
-	float ceil = 0f;
+	double ceil = 0d;
 	boolean useLWall = false;
-	float lWall = 0f;
+	double lWall = 0d;
 	boolean useRWall = false;
-	float rWall = 0f;
+	double rWall = 0d;
 
-	float fricFloor = 0f;
-	float fricCeil = 0f;
-	float fricLWall = 0f;
-	float fricRWall = 0f;
+	double fricFloor = 0d;
+	double fricCeil = 0d;
+	double fricLWall = 0d;
+	double fricRWall = 0d;
 
+	double timeScale = 1d;
 	long lastMoved = System.currentTimeMillis();
 
 	boolean pausePhysics;
 
-	public Vector2(float posx, float posy) {
+	public Vector2(double posx, double posy) {
 		this.posx = posx;
 		this.posy = posy;
 	}
 
-	public Vector2(float posx, float posy, float velx, float vely) {
+	public Vector2(double posx, double posy, double velx, double vely) {
 		this.posx = posx;
 		this.posy = posy;
 
@@ -59,7 +59,7 @@ public class Vector2 {
 		this.vely = vely;
 	}
 
-	public Vector2(float posx, float posy, float velx, float vely, float accelx, float accely) {
+	public Vector2(double posx, double posy, double velx, double vely, double accelx, double accely) {
 		this.posx = posx;
 		this.posy = posy;
 
@@ -70,32 +70,32 @@ public class Vector2 {
 		this.accely = accely;
 	}
 
-	public void setVelocity(float velx, float vely) {
+	public void setVelocity(double velx, double vely) {
 		this.velx = velx;
 		this.vely = vely;
 	}
 
-	public void addVelocity(float velx, float vely) {
+	public void addVelocity(double velx, double vely) {
 		this.velx += velx;
 		this.vely += vely;
 	}
 
-	public void subVelocity(float velx, float vely) {
+	public void subVelocity(double velx, double vely) {
 		this.velx -= velx;
 		this.vely -= vely;
 	}
 
-	public void setAccel(float accelx, float accely) {
+	public void setAccel(double accelx, double accely) {
 		this.accelx = accelx;
 		this.accely = accely;
 	}
 
-	public void addAccel(float accelx, float accely) {
+	public void addAccel(double accelx, double accely) {
 		this.accelx += accelx;
 		this.accely += accely;
 	}
 
-	public void subAccel(float accelx, float accely) {
+	public void subAccel(double accelx, double accely) {
 		this.accelx -= accelx;
 		this.accely -= accely;
 	}
@@ -112,66 +112,66 @@ public class Vector2 {
 		}
 	}
 
-	public float[] move() {
+	public double[] move() {
 		long curTime = System.currentTimeMillis();
-		float interval = (curTime - this.lastMoved) / 1000f;
+		double interval = ((curTime - this.lastMoved) / 1000d) * timeScale;
 		this.lastMoved = curTime;
 
 		if(this.pointGrav) {
-			this.gravx = 0f;
-			this.gravy = 0f;
+			this.gravx = 0d;
+			this.gravy = 0d;
 			for(Vector2 source : this.posGrav) {
-				float[] sourcePos = source.getPos();
-				float[] gravs = this.setGravitytoPoint(this.grav, sourcePos[0], sourcePos[1]);
+				double[] sourcePos = source.getPos();
+				double[] gravs = this.setGravitytoPoint(this.grav, source.mass, sourcePos[0], sourcePos[1]);
 				this.gravx += gravs[0];
 				this.gravy += gravs[1];
 			}
 		} else {
-			this.gravx = 0f;
+			this.gravx = 0d;
 			this.gravy = this.grav;
 		}
 
 		if (!this.pausePhysics)
-			return new float[] {this.moveX(interval), this.moveY(interval)};
+			return new double[] {this.moveX(interval), this.moveY(interval)};
 		else
-			return new float[] {this.posx, this.posy};
+			return new double[] {this.posx, this.posy};
 	}
 
-	public float moveX(float seconds) {
+	public double moveX(double seconds) {
 		fricX(seconds);
 
-		float velInit = this.velx;
+		double velInit = this.velx;
 		this.velx += this.getVelDiff(this.accelx + this.gravx, seconds);
 
 		if(!this.invertX) this.posx -= this.displacement(velInit, this.velx, seconds);
 		else this.posx += this.displacement(velInit, this.velx, seconds);
 
-		float[] boundx = boundX(this.posx, this.velx);
+		double[] boundx = boundX(this.posx, this.velx);
 		this.posx = boundx[0];
 		this.velx = boundx[1];
 
 		return this.posx;
 	}
 
-	public float moveY(float seconds) {
+	public double moveY(double seconds) {
 		fricY(seconds);
 
-		float velInit = this.vely;
+		double velInit = this.vely;
 		this.vely += this.getVelDiff(this.accely - this.gravy, seconds);
 
 		if(!this.invertY) this.posy += this.displacement(velInit, this.vely, seconds);
 		else this.posy -= this.displacement(velInit, this.vely, seconds);
 
-		float[] boundy = boundY(this.posy, this.vely);
+		double[] boundy = boundY(this.posy, this.vely);
 		this.posy = boundy[0];
 		this.vely = boundy[1];
 
 		return this.posy;
 	}
 
-	public void fricY(float seconds) {
+	public void fricY(double seconds) {
 		if ((this.useFloor && (this.invertY ? this.posy >= this.floor : this.posy <= this.floor)) || (this.useCeil && (this.invertY ? this.posy <= this.ceil : this.posy >= this.ceil))) {
-			float fric = (this.useFloor && this.posy <= this.floor ? this.fricFloor : this.fricCeil) * seconds;
+			double fric = (this.useFloor && this.posy <= this.floor ? this.fricFloor : this.fricCeil) * seconds;
 
 			if(fric > Math.abs(this.velx))
 				this.velx = 0;
@@ -185,9 +185,9 @@ public class Vector2 {
 		}
 	}
 
-	public void fricX(float seconds) {
+	public void fricX(double seconds) {
 		if ((this.useLWall && (this.invertX ? this.posx >= this.lWall : this.posx <= this.lWall)) || (this.useRWall && (this.invertX ? this.posx <= this.rWall : this.posx >= this.rWall))) {
-			float fric = (this.useLWall && this.posx <= this.lWall ? this.fricLWall : this.fricRWall) * seconds;
+			double fric = (this.useLWall && this.posx <= this.lWall ? this.fricLWall : this.fricRWall) * seconds;
 
 			if(fric > Math.abs(this.vely))
 				this.vely = 0;
@@ -201,75 +201,75 @@ public class Vector2 {
 		}
 	}
 
-	public float[] boundY(float yVal, float yVel) {
+	public double[] boundY(double yVal, double yVel) {
 		if (this.useFloor && ((!this.invertY && yVal < this.floor) || (this.invertY && yVal > this.floor))) {
 			yVal = this.floor;
-			yVel = 0f;
+			yVel = 0d;
 		}
 
 		if (this.useCeil && ((!this.invertY && yVal > this.ceil) || (this.invertY && yVal < this.ceil))) {
 			yVal = this.ceil;
-			yVel = 0f;
+			yVel = 0d;
 		}
 
-		return new float[] {yVal, yVel};
+		return new double[] {yVal, yVel};
 	}
 
-	public float[] boundX(float xVal, float xVel) {
+	public double[] boundX(double xVal, double xVel) {
 		if (this.useLWall && ((!this.invertX && xVal < this.lWall) || (this.invertX && xVal > this.lWall))) {
 			xVal = this.lWall;
-			xVel = 0f;
+			xVel = 0d;
 		}
 
 		if (this.useRWall && ((!this.invertX && xVal > this.rWall) || (this.invertX && xVal < this.rWall))) {
 			xVal = this.rWall;
-			xVel = 0f;
+			xVel = 0d;
 		}
 
-		return new float[] {xVal, xVel};
+		return new double[] {xVal, xVel};
 	}
 
-	public float displacement(float velInit, float velFinal, float seconds) {
+	public double displacement(double velInit, double velFinal, double seconds) {
 		return ((velInit + velFinal) / 2) * seconds;
 	}
 
-	public float getVelDiff(float accel, float seconds) {
+	public double getVelDiff(double accel, double seconds) {
 		return accel * seconds;
 	}
 
-	public void setFloor(float floor) {
+	public void setFloor(double floor) {
 		this.useFloor = true;
 		this.floor = floor;
 	}
 
-	public void setCeil(float ceil) {
+	public void setCeil(double ceil) {
 		this.useCeil = true;
 		this.ceil = ceil;
 	}
 
-	public void setLWall(float lWall) {
+	public void setLWall(double lWall) {
 		this.useLWall = true;
 		this.lWall = lWall;
 	}
 
-	public void setRWall(float rWall) {
+	public void setRWall(double rWall) {
 		this.useRWall = true;
 		this.rWall = rWall;
 	}
 
-	public float[] getPos() {
-		return new float[] {this.posx, this.posy};
+	public double[] getPos() {
+		return new double[] {this.posx, this.posy};
 	}
 
-	public void setPos(float x, float y) {
+	public void setPos(double x, double y) {
 		this.posx = x;
 		this.posy = y;
 
-		float[] boundx = boundX(this.posx, this.velx);
+		double[] boundx = boundX(this.posx, this.velx);
 		this.posx = boundx[0];
 		this.velx = boundx[1];
 
-		float[] boundy = boundY(this.posy, this.vely);
+		double[] boundy = boundY(this.posy, this.vely);
 		this.posy = boundy[0];
 		this.vely = boundy[1];
 	}
@@ -277,16 +277,16 @@ public class Vector2 {
 	public void pausePhysics(boolean pause) {
 		this.pausePhysics = pause;
 		if(pause) {
-			this.velx = 0f;
-			this.vely = 0f;
+			this.velx = 0d;
+			this.vely = 0d;
 		}
 	}
 
-	public float[] outOfBounds(int x, int y) {
-		float[] boundx = boundX(x, 0f);
-		float[] boundy = boundY(y, 0f);
+	public double[] outOfBounds(int x, int y) {
+		double[] boundx = boundX(x, 0d);
+		double[] boundy = boundY(y, 0d);
 
-		return new float[] {boundx[0], boundy[0]};
+		return new double[] {boundx[0], boundy[0]};
 	}
 
 	private enum Direction {
@@ -296,45 +296,47 @@ public class Vector2 {
 		WEST
 	}
 
-	public float distanceFrom(float x, float y) {		
-		return (float) Math.sqrt(Math.pow(Math.abs(x - this.posx), 2) + Math.pow(Math.abs(y - this.posy), 2));
+	public double distanceFrom(double x, double y) {		
+		return (double) Math.sqrt(Math.pow(Math.abs(x - this.posx), 2) + Math.pow(Math.abs(y - this.posy), 2));
 	}
 
-	public float[] setGravitytoPoint(float grav, float xPos, float yPos) {
+	public double[] setGravitytoPoint(double grav, double gravMass, double xPos, double yPos) {
 		// grav = hypotenuse
 				// angle = ???
 
-		float dist = this.distanceFrom(xPos, yPos);
-		float diffx = xPos - this.posx;
-		float diffy = yPos - this.posy;
+		double dist = this.distanceFrom(xPos, yPos);
+		double diffx = xPos - this.posx;
+		double diffy = yPos - this.posy;
 
 		// hypotenuse = dist
 		// opposite = diffx
 		// adjacent = diffy
 
-		grav = (grav * this.mass) / dist;
+		grav = grav * ((gravMass * this.mass) / (double) Math.pow(dist, 2));
+		double maxGrav = 15000;
+		grav = (grav > maxGrav ? maxGrav : grav);
 
-		if(diffx == 0f && diffy == 0f)
-			return new float[] {0f, 0f};
+		if(diffx == 0d && diffy == 0d)
+			return new double[] {0d, 0d};
 
 		double angle = Math.atan(Math.abs(diffy) / Math.abs(diffx));
 
-		// angle = 90f - angle; // Reverse value (turn to clockwise)
+		// angle = 90d - angle; // Reverse value (turn to clockwise)
 
 		// System.out.println(diffx + ", " + diffy + " dir: " + direction + " ang: " + Math.toDegrees(angle));
 
 		// System.out.println(Math.tan(angle) / grav);
 
-		float xGrav = grav * (float) Math.cos(angle);
-		float yGrav = grav * (float) Math.sin(angle);
+		double xGrav = grav * (double) Math.cos(angle);
+		double yGrav = grav * (double) Math.sin(angle);
 
 		Direction direction = Direction.WEST;
 
-		if(diffx < 0f && diffy >= 0f)
+		if(diffx < 0d && diffy >= 0d)
 			direction = Direction.NORTH;
-		else if(diffx >= 0f && diffy < 0f)
+		else if(diffx >= 0d && diffy < 0d)
 			direction = Direction.SOUTH;
-		else if(diffx <= 0f && diffy < 0f)
+		else if(diffx <= 0d && diffy < 0d)
 			direction = Direction.EAST;
 
 		switch(direction) {
@@ -354,6 +356,6 @@ public class Vector2 {
 
 		// System.out.println("xGrav: " + xGrav + " yGrav: " + yGrav + " total: " + Math.sqrt(Math.pow(xGrav, 2) + Math.pow(yGrav, 2)));
 
-		return new float[] {xGrav, yGrav};
+		return new double[] {xGrav, yGrav};
 	}
 }

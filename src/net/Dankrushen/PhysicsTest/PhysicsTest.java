@@ -28,29 +28,40 @@ import javax.swing.SwingConstants;
 
 class PopUp extends JPopupMenu {
 	private static final long serialVersionUID = 1L;
-	static final LinkedHashMap<String, Float> FRICTIONS = new LinkedHashMap<String, Float>()
+	static final LinkedHashMap<String, Double> FRICTIONS = new LinkedHashMap<String, Double>()
 	{
 		private static final long serialVersionUID = -902882376711498738L;
 
 		{
-			put("Rubber", 1f);
-			put("Steel", 0.74f);
-			put("Glass", 0.6f);
-			put("Aluminum", 0.47f);
-			put("Wood", 0.45f);
-			put("Copper", 0.36f);
-			put("Graphite", 0.1f);
-			put("Teflon", 0.04f);
+			put("Rubber", 1d);
+			put("Steel", 0.74d);
+			put("Glass", 0.6d);
+			put("Aluminum", 0.47d);
+			put("Wood", 0.45d);
+			put("Copper", 0.36d);
+			put("Graphite", 0.1d);
+			put("Teflon", 0.04d);
+						
+			/*
+			put("Rubber", 1000d);
+			put("Steel", 7400d);
+			put("Glass", 600d);
+			put("Aluminum", 4700d);
+			put("Wood", 4500d);
+			put("Copper", 3600d);
+			put("Graphite", 100d);
+			put("Teflon", 40d);
+			*/
 		}
 	};
 
-	public static float getIndexValue(int index) {
+	public static double getIndexValue(int index) {
 		if(index < 0 || index >= FRICTIONS.size())
 			return 0;
 
-		List<Entry<String, Float>> keys = new ArrayList<Entry<String, Float>>(FRICTIONS.entrySet());
+		List<Entry<String, Double>> keys = new ArrayList<Entry<String, Double>>(FRICTIONS.entrySet());
 
-		Entry<String, Float> curEntry = keys.get(index);
+		Entry<String, Double> curEntry = keys.get(index);
 
 		return curEntry.getValue();
 	}
@@ -59,11 +70,11 @@ class PopUp extends JPopupMenu {
 		JMenuItem fric = new JMenuItem("Friction:");
 		add(fric);
 		
-		List<Entry<String, Float>> keys = new ArrayList<Entry<String, Float>>(FRICTIONS.entrySet());
+		List<Entry<String, Double>> keys = new ArrayList<Entry<String, Double>>(FRICTIONS.entrySet());
 
 		for(int i = 0; i < FRICTIONS.size(); i++) {
 			final int index = i;
-			final Entry<String, Float> curEntry = keys.get(index);
+			final Entry<String, Double> curEntry = keys.get(index);
 			
 			JCheckBoxMenuItem fricItem = new JCheckBoxMenuItem(curEntry.getKey() + " (" + curEntry.getValue() + ")");
 			fricItem.setSelected(index == parent.curFric);
@@ -151,9 +162,9 @@ public class PhysicsTest {
 	public Vector2 windowPhys;
 
 	int targetFramerate = 60;
-	int frameLimit = Math.round(1f / ((float) targetFramerate) * 1000f);
+	int frameLimit = (int) Math.round(1d / ((double) targetFramerate) * 1000d);
 
-	public float scale = 1080f / 0.28702f; // 1080 pixels / 11.3 inches high or 0.28702 meters
+	public double scale = 1080d / 0.28702d; // 1080 pixels / 11.3 inches high or 0.28702 meters
 	int x = 0;
 	int y = 0;
 
@@ -161,7 +172,7 @@ public class PhysicsTest {
 	int yPointDiff = 0;
 	
 	int curFric = 2;
-	float friction = PopUp.getIndexValue(curFric);
+	double friction = PopUp.getIndexValue(curFric);
 
 	boolean THROW = false;
 	boolean LOCK_PHYS = false;
@@ -185,7 +196,7 @@ public class PhysicsTest {
 		initialize();
 
 		Point location = frame.getLocationOnScreen();
-		windowPhys = new Vector2((float) location.getX(), (float) location.getY());
+		windowPhys = new Vector2((double) location.getX(), (double) location.getY());
 		windowPhys.invertY = true;
 
 		moveWindow();
@@ -197,7 +208,7 @@ public class PhysicsTest {
 
 				if(THROW && (double) framecount >= throwEvery) {
 					Random random = new Random();
-					windowPhys.addVelocity(((random.nextFloat() - 0.50f) * 0.80f) * scale, (random.nextFloat() * 0.65f) * scale);
+					windowPhys.addVelocity(((random.nextDouble() - 0.50d) * 0.80d) * scale, (random.nextDouble() * 0.65d) * scale);
 
 					double mintime = 0.5d;
 					double maxtime = 3d;
@@ -205,20 +216,20 @@ public class PhysicsTest {
 					framecount = 0;
 				}
 
-				//windowPhys.gravx = xScale * 0.62f; // Scale m/s2
-				//windowPhys.gravy = yScale * 0.62f; // Scale m/s2
-				windowPhys.grav = scale * 0.62f;
+				//windowPhys.gravx = xScale * 0.62d; // Scale m/s2
+				//windowPhys.gravy = yScale * 0.62d; // Scale m/s2
+				windowPhys.grav = scale * 0.62d;
 				windowPhys.gravScale = scale;
 
-				windowPhys.mass = 100f;
-
+				// windowPhys.timeScale = 0.25d;
+				
 				windowPhys.fricFloor = scale * friction;
 				windowPhys.fricCeil = scale * friction;
 
 				windowPhys.fricLWall = scale * friction;
 				windowPhys.fricRWall = scale * friction;
 
-				// windowPhys.addVelocity(0f, windowPhys.gravy * 0f);
+				// windowPhys.addVelocity(0d, windowPhys.gravy * 0d);
 
 				calculateMove();
 				framecount++;
@@ -239,57 +250,58 @@ public class PhysicsTest {
 		xPointDiff = (int) Math.round((double) frame.getWidth() / 2d);
 		yPointDiff = (int) Math.round((double) frame.getHeight() / 2d);
 
+		if(frame.isVisible()) {
+			windowPhys.mass = (frame.getWidth() + frame.getHeight()) / 5d;
+		}
+		
 		if(regBuild) {
-			windowPhys.setLWall(0f + xPointDiff);
+			windowPhys.setLWall(0d + xPointDiff);
 			windowPhys.setRWall(width - frame.getWidth() + xPointDiff);
 
-			windowPhys.setCeil(0f + yPointDiff);
-			windowPhys.setFloor(height - frame.getHeight() - 40f + yPointDiff);
+			windowPhys.setCeil(0d + yPointDiff);
+			windowPhys.setFloor(height - frame.getHeight() - 40d + yPointDiff);
 		} else {
-			windowPhys.setLWall(0f - 1280f + xPointDiff);
-			windowPhys.setRWall(width - frame.getWidth() + 1280f + xPointDiff);
+			windowPhys.setLWall(0d - 1280d + xPointDiff);
+			windowPhys.setRWall(width - frame.getWidth() + 1280d + xPointDiff);
 
 			if(frame.isVisible()) {
 				Point location = frame.getLocationOnScreen();
-				windowPhys.setCeil(0f + yPointDiff);
-				windowPhys.setFloor(height - frame.getHeight() - (location.getX() < 0d || location.getX() > (1920d - frame.getWidth()) ? 56f : 0f) - 40f + yPointDiff);
+				windowPhys.setCeil(0d + yPointDiff);
+				windowPhys.setFloor(height - frame.getHeight() - (location.getX() < 0d || location.getX() > (1920d - frame.getWidth()) ? 56d : 0d) - 40d + yPointDiff);
 			}
 		}
 	}
 
-	public void calculateMove() {
+	public void calculateMove() { // Definite loss of accuracy here?
 		if (LOCK_PHYS) {
 			windowPhys.pausePhysics(true);
 		} else if(windowPhys.pausePhysics != LOCK_PHYS && !dragging && !popup) {
 			windowPhys.pausePhysics(false);
 		}
 
-		float[] oldPos = windowPhys.getPos();
-		float[] newPos = windowPhys.move();
-
-		int disX = Math.round(newPos[0]) - Math.round(oldPos[0]);
-		int disY = Math.round(newPos[1]) - Math.round(oldPos[1]);
+		double[] oldPos = windowPhys.getPos();
+		double[] newPos = windowPhys.move();
 
 		//System.out.println("Displacement: (" + disX + ", " + disY + ")");
 
 		//this.x = Math.round(newPos[0]);
 		//this.y = Math.round(newPos[1]);
 
-		if(frame.isVisible()) {
-			Point location = frame.getLocationOnScreen();
-			this.x = location.x + disX + this.xPointDiff;
-			this.y = location.y + disY + this.yPointDiff;
-		}
-
-		float[] oob = windowPhys.outOfBounds(this.x, this.y);
-		this.x = Math.round(oob[0]);
-		this.y = Math.round(oob[1]);
-
-		windowPhys.setPos((float) this.x, (float) this.y);
+		this.x = (int) Math.round(newPos[0]);// + this.xPointDiff;
+		this.y = (int) Math.round(newPos[1]);// + this.yPointDiff;
 
 		if(!windowPhys.pausePhysics)
 			moveWindow();
-		else windowPhys.setVelocity((oldPos[0] - this.x) * frameLimit, (oldPos[1] - this.y) * frameLimit);
+		else {
+			if(frame.isVisible()) {
+				Point location = frame.getLocationOnScreen();
+				this.x = location.x + this.xPointDiff;
+				this.y = location.y + this.yPointDiff;
+			}
+			
+			windowPhys.setPos((double) this.x, (double) this.y);
+			windowPhys.setVelocity((oldPos[0] - this.x) * frameLimit, (oldPos[1] - this.y) * frameLimit);
+		}
 
 		if(GRAV_POINT)
 			parent.setGravPoint(this, this.x, this.y, this.windowPhys.mass);
@@ -301,12 +313,12 @@ public class PhysicsTest {
 		frame.setLocation(this.x - this.xPointDiff, this.y - this.yPointDiff);
 	}
 
-	public void drawColour(float netVel) {
+	public void drawColour(double netVel) {
 		//System.out.println(netVel);
 		DecimalFormat roundVel = new DecimalFormat("0.0");
 		lblSpeed.setText(roundVel.format(netVel) + " m/s");
 
-		frame.getContentPane().setBackground(new Color(((netVel = (netVel < 0 ? 0 : netVel)) > 1 ? 1 : netVel), 0f, 0f));
+		frame.getContentPane().setBackground(new Color((float) ((netVel = (netVel < 0 ? 0 : netVel)) > 1 ? 1 : netVel), 0f, 0f));
 	}
 
 	/**
