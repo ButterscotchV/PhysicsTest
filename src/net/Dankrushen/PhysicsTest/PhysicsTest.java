@@ -300,7 +300,7 @@ public class PhysicsTest {
 			}
 			
 			windowPhys.setPos((double) this.x, (double) this.y);
-			windowPhys.setVelocity((oldPos[0] - this.x) * frameLimit, (oldPos[1] - this.y) * frameLimit);
+			windowPhys.setVelocity((double) (((double) oldPos[0] - (double) this.x) * 16.66666666d), (double) (((double) oldPos[1] - (double) this.y) * 16.66666666d));
 		}
 
 		if(GRAV_POINT)
