@@ -22,7 +22,7 @@ public class Vector2 {
 	double accelx = 0d;
 	double accely = 0d;
 
-	double mass = 0d;
+	double mass = 1d;
 
 	boolean invertX = false;
 	boolean invertY = false;
@@ -122,7 +122,7 @@ public class Vector2 {
 			this.gravy = 0d;
 			for(Vector2 source : this.posGrav) {
 				double[] sourcePos = source.getPos();
-				double[] gravs = this.setGravitytoPoint(this.grav, source.mass, sourcePos[0], sourcePos[1]);
+				double[] gravs = this.setGravitytoPoint(source.mass, sourcePos[0], sourcePos[1]);
 				this.gravx += gravs[0];
 				this.gravy += gravs[1];
 			}
@@ -140,11 +140,10 @@ public class Vector2 {
 	public double moveX(double seconds) {
 		fricX(seconds);
 
-		double velInit = this.velx;
 		this.velx += this.getVelDiff(this.accelx + this.gravx, seconds);
 
-		if(!this.invertX) this.posx -= this.displacement(velInit, this.velx, seconds);
-		else this.posx += this.displacement(velInit, this.velx, seconds);
+		if(!this.invertX) this.posx -= this.displacement( this.velx, seconds);
+		else this.posx += this.displacement( this.velx, seconds);
 
 		double[] boundx = boundX(this.posx, this.velx);
 		this.posx = boundx[0];
@@ -156,11 +155,10 @@ public class Vector2 {
 	public double moveY(double seconds) {
 		fricY(seconds);
 
-		double velInit = this.vely;
 		this.vely += this.getVelDiff(this.accely - this.gravy, seconds);
 
-		if(!this.invertY) this.posy += this.displacement(velInit, this.vely, seconds);
-		else this.posy -= this.displacement(velInit, this.vely, seconds);
+		if(!this.invertY) this.posy += this.displacement(this.vely, seconds);
+		else this.posy -= this.displacement(this.vely, seconds);
 
 		double[] boundy = boundY(this.posy, this.vely);
 		this.posy = boundy[0];
@@ -229,8 +227,8 @@ public class Vector2 {
 		return new double[] {xVal, xVel};
 	}
 
-	public double displacement(double velInit, double velFinal, double seconds) {
-		return ((velInit + velFinal) / 2) * seconds;
+	public double displacement(double velFinal, double seconds) {
+		return velFinal * seconds;
 	}
 
 	public double getVelDiff(double accel, double seconds) {
@@ -297,10 +295,10 @@ public class Vector2 {
 	}
 
 	public double distanceFrom(double x, double y) {		
-		return (double) Math.sqrt(Math.pow(Math.abs(x - this.posx), 2) + Math.pow(Math.abs(y - this.posy), 2));
+		return Math.sqrt(Math.pow(Math.abs(x - this.posx), 2) + Math.pow(Math.abs(y - this.posy), 2));
 	}
 
-	public double[] setGravitytoPoint(double grav, double gravMass, double xPos, double yPos) {
+	public double[] setGravitytoPoint(double gravMass, double xPos, double yPos) {
 		// grav = hypotenuse
 				// angle = ???
 
@@ -312,8 +310,8 @@ public class Vector2 {
 		// opposite = diffx
 		// adjacent = diffy
 
-		grav = grav * ((gravMass * this.mass) / (double) Math.pow(dist, 2));
-		double maxGrav = 15000;
+		double grav = ((6.67408d * Math.pow(10, -11)) * ((gravMass * this.mass) / Math.pow(dist, 2))) / this.mass;
+		double maxGrav = 15000d;
 		grav = (grav > maxGrav ? maxGrav : grav);
 
 		if(diffx == 0d && diffy == 0d)
@@ -327,8 +325,8 @@ public class Vector2 {
 
 		// System.out.println(Math.tan(angle) / grav);
 
-		double xGrav = grav * (double) Math.cos(angle);
-		double yGrav = grav * (double) Math.sin(angle);
+		double xGrav = grav * Math.cos(angle);
+		double yGrav = grav * Math.sin(angle);
 
 		Direction direction = Direction.WEST;
 
@@ -354,7 +352,7 @@ public class Vector2 {
 			break;
 		}
 
-		// System.out.println("xGrav: " + xGrav + " yGrav: " + yGrav + " total: " + Math.sqrt(Math.pow(xGrav, 2) + Math.pow(yGrav, 2)));
+		//System.out.println("xGrav: " + xGrav + " yGrav: " + yGrav + " total: " + Math.sqrt(Math.pow(xGrav, 2) + Math.pow(yGrav, 2)));
 
 		return new double[] {xGrav, yGrav};
 	}

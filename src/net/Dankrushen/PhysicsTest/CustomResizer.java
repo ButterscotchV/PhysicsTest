@@ -99,6 +99,7 @@ public class CustomResizer extends MouseAdapter
 			menu.show(e.getComponent(), e.getX(), e.getY());
 			
 			new Thread() {
+				@Override
 				public void run() {
 					while(menu.isShowing()) {
 						try {

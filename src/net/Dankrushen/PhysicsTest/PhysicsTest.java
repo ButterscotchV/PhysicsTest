@@ -162,7 +162,7 @@ public class PhysicsTest {
 	public Vector2 windowPhys;
 
 	int targetFramerate = 60;
-	int frameLimit = (int) Math.round(1d / ((double) targetFramerate) * 1000d);
+	int frameLimit = (int) Math.round(1d / (targetFramerate) * 1000d);
 
 	public double scale = 1080d / 0.28702d; // 1080 pixels / 11.3 inches high or 0.28702 meters
 	int x = 0;
@@ -179,7 +179,7 @@ public class PhysicsTest {
 	boolean GRAV_POINT = false;
 	boolean dragging = false;
 	boolean popup = false;
-	double throwEvery = 3d * (double) targetFramerate; // Frames (in seconds)
+	double throwEvery = 3d * targetFramerate; // Frames (in seconds)
 	int framecount = 0;
 
 	boolean regBuild = true;
@@ -196,23 +196,24 @@ public class PhysicsTest {
 		initialize();
 
 		Point location = frame.getLocationOnScreen();
-		windowPhys = new Vector2((double) location.getX(), (double) location.getY());
+		windowPhys = new Vector2(location.getX(), location.getY());
 		windowPhys.invertY = true;
 
 		moveWindow();
 
 		Timer timer = new Timer(frameLimit,new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent event) 
 			{
 				setBounds();
 
-				if(THROW && (double) framecount >= throwEvery) {
+				if(THROW && framecount >= throwEvery) {
 					Random random = new Random();
 					windowPhys.addVelocity(((random.nextDouble() - 0.50d) * 0.80d) * scale, (random.nextDouble() * 0.65d) * scale);
 
 					double mintime = 0.5d;
 					double maxtime = 3d;
-					throwEvery = ((random.nextDouble() * maxtime - mintime) + mintime) * (double) targetFramerate;
+					throwEvery = ((random.nextDouble() * maxtime - mintime) + mintime) * targetFramerate;
 					framecount = 0;
 				}
 
@@ -247,11 +248,12 @@ public class PhysicsTest {
 		int width = gd.getDisplayMode().getWidth();
 		int height = gd.getDisplayMode().getHeight();
 		
-		xPointDiff = (int) Math.round((double) frame.getWidth() / 2d);
-		yPointDiff = (int) Math.round((double) frame.getHeight() / 2d);
+		xPointDiff = (int) Math.round(frame.getWidth() / 2d);
+		yPointDiff = (int) Math.round(frame.getHeight() / 2d);
 
 		if(frame.isVisible()) {
-			windowPhys.mass = (frame.getWidth() + frame.getHeight()) / 5d;
+			windowPhys.mass = Math.pow(1.03, (frame.getWidth() + frame.getHeight())) * Math.pow(10, 8);
+			//System.out.println(windowPhys.mass);
 		}
 		
 		if(regBuild) {
@@ -299,12 +301,12 @@ public class PhysicsTest {
 				this.y = location.y + this.yPointDiff;
 			}
 			
-			windowPhys.setPos((double) this.x, (double) this.y);
-			windowPhys.setVelocity((double) (((double) oldPos[0] - (double) this.x) * 16.66666666d), (double) (((double) oldPos[1] - (double) this.y) * 16.66666666d));
+			windowPhys.setPos(this.x, this.y);
+			windowPhys.setVelocity((oldPos[0] - this.x) * frameLimit, (oldPos[1] - this.y) * frameLimit);
 		}
 
 		if(GRAV_POINT)
-			parent.setGravPoint(this, this.x, this.y, this.windowPhys.mass);
+			parent.setGravPoint(this);
 
 		drawColour(Math.abs(windowPhys.velx / scale) + Math.abs(windowPhys.vely / scale));
 	}

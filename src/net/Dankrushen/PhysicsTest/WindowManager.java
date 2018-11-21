@@ -15,6 +15,7 @@ public class WindowManager {
 		}
 
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					new WindowManager();
@@ -31,7 +32,7 @@ public class WindowManager {
 		windows.add(new PhysicsTest(this));
 	}
 
-	public void setGravPoint(PhysicsTest window, int x, int y, double mass) {
+	public void setGravPoint(PhysicsTest window) {
 		for (PhysicsTest target : windows) {
 			target.windowPhys.addGravityPoint(window.windowPhys);
 			target.windowPhys.pointGrav = true;
